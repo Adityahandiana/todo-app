@@ -4,9 +4,9 @@
         <div class="flex justify-between h-16 items-center">
             <div class="flex">
                 <!-- Logo -->
-                <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                <img src="{{ asset('image/todol.png') }}" alt="Logo" class="block h-9 w-auto">
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('create') }}"></a>
+                    <a href="{{ route('dashboard') }}"></a>
                 </div>
 
                 <!-- Navigation Links -->
@@ -19,6 +19,13 @@
                     </x-nav-link>
                 </div>
             </div>
+            <div id="deadline-warning" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/80 text-white py-2 px-4 rounded-lg shadow-lg z-50 pointer-events-none">
+                <div class="pointer-events-auto">
+                    ⚠️ Beberapa tugas mendekati deadline! Segera selesaikan.
+                </div>
+            </div>
+            
+            
 
             <!-- Search Bar (Tampil di HP & Desktop) -->
             <div class="flex sm:items-center ml-auto">
@@ -31,6 +38,8 @@
                     </button>
                 </form>
             </div>
+            
+            
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -85,14 +94,7 @@
                 {{ __('Create') }}
             </x-responsive-nav-link>
 
-            <!-- Search Bar (Tampil di Mobile) -->
-            <div class="px-4 mt-2">
-                <form action="{{ route('tasks.search') }}" method="GET">
-                    <input type="text" name="query" placeholder="Cari tugas..."
-                        class="w-full border rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                        value="{{ request('query') }}">
-                </form>
-            </div>
+            
         </div>
 
         <!-- Responsive Settings Options -->
@@ -117,3 +119,42 @@
         </div>
     </div>
 </nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+                const today = new Date();
+                
+                document.querySelectorAll('.task-card').forEach(function (taskCard) {
+                    const deadlineDate = new Date(taskCard.getAttribute('data-deadline'));
+                    const timeDiff = (deadlineDate - today) / (1000 * 60 * 60 * 24);
+        
+                    if (timeDiff <= 2) { // Deadline ≤ 2 hari
+                        taskCard.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    }
+                });
+            });
+            function checkDeadlineWarnings() {
+        let tasks = document.querySelectorAll('[data-deadline]');
+        let hasUrgentTask = false;
+    
+        tasks.forEach(task => {
+            let deadline = new Date(task.getAttribute('data-deadline'));
+            let now = new Date();
+            let difference = (deadline - now) / (1000 * 60 * 60 * 24); // Konversi ke hari
+    
+            if (difference <= 3 && !task.classList.contains('completed')) {
+                hasUrgentTask = true;
+            }
+        });
+    
+        let warningBox = document.getElementById('deadline-warning');
+        if (hasUrgentTask) {
+            warningBox.classList.remove('hidden');
+        } else {
+            warningBox.classList.add('hidden');
+        }
+    }
+    
+    // Panggil fungsi saat halaman dimuat
+    document.addEventListener("DOMContentLoaded", checkDeadlineWarnings);
+    </script>

@@ -4,8 +4,12 @@ use App\Http\Controllers\TasksController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-// Rute untuk halaman beranda
-Route::get('/', [TasksController::class, 'welcome']);
+
+
+Route::get('/', function () {
+    return redirect()->route('login'); 
+});
+
 
 // Rute untuk dashboard
 Route::middleware(['auth'])->group(function () {

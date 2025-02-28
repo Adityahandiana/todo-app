@@ -21,14 +21,22 @@
                             <input type="text" id="description" name="description" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300" value="{{ old('description', $task->description) }}" required>
                         </div>
 
+                        <!-- Task Deadline -->
+                        <div class="mb-4">
+                            <label for="deadline" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Deadline</label>
+                            <input type="date" id="deadline" name="deadline" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300" value="{{ old('deadline', $task->deadline ? $task->deadline->format('Y-m-d') : '') }}" required min="{{ date('Y-m-d') }}">
+                        </div>
+
                         <!-- Subtasks -->
                         <div class="mb-4">
                             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">Subtasks</h3>
                             <ul id="subtask-list">
                                 @foreach($task->subTasks as $subTask)
-                                    <li class="flex items-center mb-2">
-                                        <input type="text" name="subtasks[{{ $subTask->id }}]" value="{{ $subTask->description }}" class="px-2 py-1 border rounded mr-2 dark:bg-gray-700 dark:text-gray-300">
-                                        <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">delete</button>
+                                    <li class="flex items-center mb-2" id="subtask-{{ $subTask->id }}">
+                                        <input type="checkbox" name="subtask_completed[{{ $subTask->id }}]" value="1" class="mr-2" {{ $subTask->completed ? 'checked' : '' }}>
+                                        <input type="text" name="subtasks[{{ $subTask->id }}]" value="{{ $subTask->description }}" class="px-2 py-1 border rounded mr-2 dark:bg-gray-700 dark:text-gray-300" required>
+                                        <input type="hidden" name="deleted_subtasks[]" value="" id="deleted-subtask-{{ $subTask->id }}">
+                                        <button type="button" onclick="markSubtaskDeleted({{ $subTask->id }})" class="text-red-500 hover:text-red-700">delete</button>
                                     </li>
                                 @endforeach
                             </ul>
@@ -64,11 +72,17 @@
             let newItem = document.createElement('li');
             newItem.className = 'flex items-center mb-2';
             newItem.innerHTML = `
-                <input type="text" name="new_subtasks[]" value="${subtaskText}" class="px-2 py-1 border rounded mr-2 dark:bg-gray-700 dark:text-gray-300">
+                <input type="checkbox" name="new_subtasks_completed[]" value="0" class="mr-2">
+                <input type="text" name="new_subtasks[]" value="${subtaskText}" class="px-2 py-1 border rounded mr-2 dark:bg-gray-700 dark:text-gray-300" required>
                 <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">delete</button>
             `;
             list.appendChild(newItem);
             document.getElementById('new-subtask').value = '';
+        }
+
+        function markSubtaskDeleted(subtaskId) {
+            document.getElementById(`subtask-${subtaskId}`).style.display = "none";
+            document.getElementById(`deleted-subtask-${subtaskId}`).value = subtaskId;
         }
     </script>
 </x-app-layout>
